@@ -6,10 +6,10 @@ A typed API for server/client communication, making it easy to structure your AP
 
 ### 📝 Declaring your API
 
-First, create a file called `API.ts` and import the `API_DECLARATION` type from `@quickapi/api.ts`. Your API should be an object containing functions that represent the different endpoints of your API. Each function should take a `requester` parameter, which can contain information about the requester. 
+First, create a file called `API.ts` and import the `API_DECLARATION` type from `quickapi/api.ts`. Your API should be an object containing functions that represent the different endpoints of your API. Each function should take a `requester` parameter, which can contain information about the requester. 
 
 ```ts
-import type { API_DECLARATION } from "@quickapi/mod.ts";
+import type { API_DECLARATION } from "https://deno.land/x/quickapi/mod.ts";
 
 export default {
     add(req, a: number, b: number){
@@ -25,21 +25,21 @@ export default {
 
 ### 📦 Distributing your API
 
-Next, import your API object and use the `flatAPI` function from `@quickapi/server.ts` to distribute it. This creates a flat map of functions that can be used by clients.
+Next, import your API object and use the `flatAPI` function from `quickapi/server.ts` to distribute it. This creates a flat map of functions that can be used by clients.
 
 ```ts
 import API from "./API.ts"
-import { flatAPI } from "@quickapi/mod.ts"
+import { flatAPI } from "https://deno.land/x/quickapi/mod.ts"
 
 const api = flatAPI(API);
 ```
 
 ## Client-side Usage
 
-Use the `initAPI` function from `@quickapi/client.ts` to initialize your API on the client side. This function takes a generic type that should match the type of your API, and a callback function that will be used to communicate with the server.
+Use the `initAPI` function from `quickapi/client.ts` to initialize your API on the client side. This function takes a generic type that should match the type of your API, and a callback function that will be used to communicate with the server.
 
 ```ts
-import { initAPI } from "@quickapi/client.ts";
+import { initAPI } from "https://deno.land/x/quickapi/client.ts";
 import type API from "<backend>/API.ts";
 
 const { callAPI } = initAPI<typeof API>((key, ...params) => {
@@ -47,6 +47,8 @@ const { callAPI } = initAPI<typeof API>((key, ...params) => {
 });
 
 callAPI("add", 10, 5);
+//Or nested call
+callAPI("advanced.multiply", 2, 6);
 ```
 
 You can now use the `callAPI` function to call any endpoint of your API, with the added benefit of type checking for the parameters at compile time.
@@ -57,17 +59,20 @@ You can now use the `callAPI` function to call any endpoint of your API, with th
 
 ## Advanced case
 
-🔍 Requester: The requester parameter is optional and can be used to store information about the user making the request. It is up to you to define the fields of this object and handle the communication accordingly
+🔍 Requester: The requester parameter can be used to store information about the user making the request. It is up to you to define the fields of this object and handle the communication accordingly
+
+You can append custom properties this way :
 
 ```ts
-declare module "@quickapi/mod.ts" {
+// You can add shortcut if you define an importmap
+declare module "https://deno.land/x/quickapi/mod.ts" {
     export interface Requester {
-        sessionID: string,
+        // Your custom properties
     }
 }
 ```
 
-## Special keys
+### Special keys
 
 In addition to the endpoint functions, Quick API also supports special keys `$before`, `$beforeAll`, `$after`, and `$afterAll`.
 
