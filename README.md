@@ -2,6 +2,9 @@
 
 A typed API for server/client communication, making it easy to structure your API calls and ensure type safety.
 
+
+*This package helps you organize and structure your API calls. However, it doesn't handle communication between the client and server directly. You'll need to handle this aspect on your own or with the help of other packages* 😊
+
 ## Server-side Usage
 
 ### 📝 Declaring your API
@@ -25,13 +28,20 @@ export default {
 
 ### 📦 Distributing your API
 
-Next, import your API object and use the `flatAPI` function from `quickapi/server.ts` to distribute it. This creates a flat map of functions that can be used by clients.
+Next, import your API object and use the `compileAPI` function from `quickapi/server.ts` to distribute it. This creates a handy object to call your api from your communication system.
 
 ```ts
 import API from "./API.ts"
-import { flatAPI } from "https://deno.land/x/quickapi/mod.ts"
+import { compileAPI, type Requester } from "https://deno.land/x/quickapi/mod.ts"
 
-const api = flatAPI(API);
+const api = compileAPI(API);
+
+/**
+ * Here, you'll need to manage the way you communicate to call the API.
+ * Think about it from the perspective of a client who wants to use your API.
+ */
+const requester: Requester = { uid : crypto.randomUUID() };
+api.call("add", requester, 10, 5);
 ```
 
 ## Client-side Usage
@@ -55,8 +65,6 @@ You can now use the `callAPI` function to call any endpoint of your API, with th
 
 🎉 Give it a try and let us know how it goes!
 
-💡 **Note**: *This package focuses on structuring the API calls, it's not focused on the communication between client and server. You'll have to handle the communication by yourself or with other packages.*
-
 ## Advanced case
 
 🔍 Requester: The requester parameter can be used to store information about the user making the request. It is up to you to define the fields of this object and handle the communication accordingly
@@ -74,7 +82,7 @@ declare module "https://deno.land/x/quickapi/mod.ts" {
 
 ### Special keys
 
-In addition to the endpoint functions, Quick API also supports special keys `$before`, `$beforeAll`, `$after`, and `$afterAll`.
+In addition to the endpoint functions, Quick API also supports special keys `$before`, `$beforeAll`, `$after`, and `$afterAll`. These keys do not serve as endpoints, and `compileAPI` uses them automatically.
 
 - `$before` and `$after` can be used to define actions that should be performed before and after the endpoint functions within the same level of the API structure.
 
