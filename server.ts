@@ -1,4 +1,4 @@
-import { API_DECLARATION, API_FUNCTION } from "./api.ts";
+import { API_DECLARATION, API_FUNCTION, Requester } from "./api.ts";
 
 type ContextUnpack = {
     key: string,
@@ -69,4 +69,31 @@ export function flatAPI<A extends API_DECLARATION>(api: A) {
         }
     });
     return flat;
+}
+
+export type CompileAPIOptions = {
+    noError: boolean,
+}
+
+/**
+ * Compiles an API_DECLARATION and returns an object with a call method that can be used to execute functions defined in the API_DECLARATION
+ * @param api An API_DECLARATION object
+ * @param options An optional CompileAPIOptions object
+ */
+export function compileAPI<A extends API_DECLARATION>(api: A, options?: CompileAPIOptions){
+    const flattenedAPI = flatAPI(api);
+
+    return {
+        call<E extends (keyof typeof flattenedAPI)>(endpoint: E, ...[requester, ...params]: Parameters<(typeof flattenedAPI)[E]>){
+            // Check if the endpoint exists
+            if (!flattenedAPI[endpoint]) {
+                if (!options?.noError) {
+                    throw new Error("The api endpoint does not exist");
+                }
+                return;
+            }
+            // Execute the endpoint function and return the result
+            return flattenedAPI[endpoint](requester, ...params);
+        }
+    }
 }
