@@ -16,7 +16,8 @@ type ContextUnpack = {
 function recursiveUnpack<A extends API_DECLARATION>(api: A, callback: (fun: API_FUNCTION, context: ContextUnpack) => void, context: ContextUnpack = { key: "", allAfter: [], allBefore: [], parent: api }) {
     if (!api) return;
 
-    if (api.$beforeAll) context.allBefore.push(api.$beforeAll);
+    // Create a new array if needed, that prevent to pass by reference recursively
+    if (api.$beforeAll) context.allBefore = [...context.allBefore, api.$beforeAll];
     if (api.$afterAll) context.allAfter = [api.$afterAll, ...context.allAfter];
 
     context.parent = api;
