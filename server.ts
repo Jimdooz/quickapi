@@ -1,4 +1,4 @@
-import { API_DECLARATION, API_FUNCTION, Requester } from "./api.ts";
+import { API_DECLARATION, API_FUNCTION, FlatAPI, Requester } from "./api.ts";
 
 type ContextUnpack = {
     key: string,
@@ -59,7 +59,7 @@ export type API_FLAT = { [key: string]: API_FUNCTION };
  * Flatten an API_DECLARATION and returns a map of functions that can be easily consumed from the server
  * @param api API_DECLARATION object
  */
-export function flatAPI<A extends API_DECLARATION>(api: A) {
+export function flatAPI<A extends API_DECLARATION>(api: A): FlatAPI<A> {
     const flat: { [key: string]: API_FUNCTION } = {};
     unpackAPI(api, (fun, context) => {
         flat[context.key] = async (requester, ...params) => {
@@ -69,7 +69,7 @@ export function flatAPI<A extends API_DECLARATION>(api: A) {
             return result;
         }
     });
-    return flat;
+    return flat as FlatAPI<A>;
 }
 
 export type CompileAPIOptions = {

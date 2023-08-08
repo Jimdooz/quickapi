@@ -37,6 +37,10 @@ export type DeepValue<K extends string, G extends API_DECLARATION> = K extends `
     G[Head] extends API_DECLARATION ? DeepValue<Tail, G[Head]> : never
     : (G[K] extends API_FUNCTION ? G[K] : never);
 
+export type FlatAPI<K extends API_DECLARATION> = {
+    [E in DeepKeys<K>]: DeepValue<E, K>
+}
+
 // A type that removes the first element from a tuple
 type OmitFirst<T extends unknown[]> = T extends [unknown, ...infer R] ? R : never;
 
@@ -46,7 +50,7 @@ export type ParametersAPI<K extends DeepKeys<A>, A extends API_DECLARATION> = Om
 export type ValuesAPI<K extends DeepKeys<A>, A extends API_DECLARATION> = ReturnType<DeepValue<K, A>>;
 
 // Recursively loads the head of an API
-function loadApiHeadRecursive(api:API_DECLARATION, path = ""){
+function loadApiHeadRecursive<A extends API_DECLARATION>(api: A, path = ""){
     const toReturn : string[] = [];
     
     for(const key in api){
@@ -55,10 +59,10 @@ function loadApiHeadRecursive(api:API_DECLARATION, path = ""){
         else if (typeof next == "object") toReturn.push(...loadApiHeadRecursive(next, `${path}${key}.`));
     }
 
-    return toReturn;
+    return toReturn as DeepKeys<A>[];
 }
 
 // Get all nested key for api given
-export function apiHead(api: API_DECLARATION) : string[] {
+export function apiHead<A extends API_DECLARATION>(api: A): DeepKeys<A>[] {
     return loadApiHeadRecursive(api);
 }
